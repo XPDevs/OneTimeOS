@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notepad-Like Text Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            overflow-x: hidden;
+        }
+
+        .editor-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: #e1e1e1;
+            padding: 8px 15px;
+            border-bottom: 1px solid #ccc;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .editor-header button {
+            margin-right: 10px;
+            padding: 5px 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .editor-header button:hover {
+            background: #e6e6e6;
+        }
+
+        #file-menu {
+            position: absolute;
+            top: 40px;
+            left: 15px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 100;
+        }
+
+        #file-menu button {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            background: #fff;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        #file-menu button:hover {
+            background: #f0f0f0;
+        }
+
+        #text-editor {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content button {
+            margin: 10px 5px;
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            background: #e1e1e1;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .modal-content button:hover {
+            background: #d4d4d4;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <header class="editor-header">
+            <button onclick="toggleFileMenu()">File</button>
+            <div id="file-menu">
+                <button onclick="showSaveModal()">Save Content</button>
+                <button onclick="showModal()">Clear Content</button>
+            </div>
+        </header>
+        <textarea id="text-editor" placeholder="Start typing here..."></textarea>
+    </div>
+
+    <!-- Modal for Clear Confirmation -->
+    <div class="modal" id="clearModal">
+        <div class="modal-content">
+            <p>Are you sure you want to clear all text?</p>
+            <button onclick="confirmClear()">Yes</button>
+            <button onclick="hideModal()">No</button>
+        </div>
+    </div>
+
+    <!-- Modal for Alerts (e.g. save confirmation) -->
+    <div class="modal" id="alertModal">
+        <div class="modal-content">
+            <p id="alertMessage"></p>
+            <button onclick="closeAlert()">OK</button>
+        </div>
+    </div>
+
+    <!-- Modal for Save Confirmation -->
+    <div class="modal" id="saveModal">
+        <div class="modal-content">
+            <p>Your content has been saved successfully!</p>
+            <button onclick="closeSaveModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('text-editor');
+        const modal = document.getElementById('clearModal');
+        const alertModal = document.getElementById('alertModal');
+        const saveModal = document.getElementById('saveModal');
+        const fileMenu = document.getElementById('file-menu');
+
+        // Load saved content from localStorage
+        window.onload = () => {
+            const savedText = localStorage.getItem('textEditorContent');
+            if (savedText) {
+                editor.value = savedText;
+            }
+        };
+
+        // Save content to localStorage as you type
+        editor.addEventListener('input', () => {
+            localStorage.setItem('textEditorContent', editor.value);
+        });
+
+        // Toggle file menu visibility
+        function toggleFileMenu() {
+            fileMenu.style.display = fileMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Hide file menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.editor-header')) {
+                fileMenu.style.display = 'none';
+            }
+        });
+
+        // Show save confirmation modal
+        function showSaveModal() {
+            localStorage.setItem('textEditorContent', editor.value); // Save to localStorage
+            saveModal.style.display = 'flex';
+        }
+
+        // Close the save modal
+        function closeSaveModal() {
+            saveModal.style.display = 'none';
+        }
+
+        // Show modal for clearing content
+        function showModal() {
+            modal.style.display = 'block';
+        }
+
+        // Hide modal
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+
+        // Clear content
+        function confirmClear() {
+            editor.value = '';
+            localStorage.removeItem('textEditorContent');
+            hideModal();
+        }
+
+        // Show alert in modal
+        function showAlert(message) {
+            alertMessage.textContent = message;
+            alertModal.style.display = 'flex';
+        }
+
+        // Close alert modal
+        function closeAlert() {
+            alertModal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desktop</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 100vh;
+      background: url('bg.jpg') no-repeat center center/cover;
+      font-family: Arial, sans-serif;
+      color: #ffffff;
+    }
+    .taskbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #333;
+  height: 40px;
+  padding: 0 10px;
+  box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  position: fixed; /* This keeps the taskbar fixed at the bottom */
+  bottom: 0; /* Ensures the taskbar stays at the bottom */
+  left: 0; /* Keeps the taskbar full width */
+  z-index: 1000; /* Ensures the taskbar stays on top of other content */
+}
+
+    .taskbar > *:not(.taskbar-time) {
+      margin-right: 15px;
+    }
+    .taskbar-icon {
+      width: 30px;
+      height: 30px;
+      background-color: #444;
+      border-radius: 5px;
+      margin-right: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .taskbar-icon:hover {
+      background-color: #555;
+    }
+    .taskbar-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .taskbar-time {
+      font-size: 14px;
+      color: #fff;
+      margin-left: auto;
+    }
+    .start-button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .start-button img {
+      height: 30px;
+      width: 30px;
+    }
+    .start-menu {
+      display: none;
+      position: absolute;
+      bottom: 50px;
+      left: 10px;
+      background: #444;
+      border: 1px solid #555;
+      box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      z-index: 1000;
+      border-radius: 4px;
+    }
+    .start-menu a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 3px;
+      margin-bottom: 5px;
+    }
+    .start-menu a:hover {
+      background: #555;
+    }
+    .window {
+      width: 300px;
+      height: 400px;
+      background: #fff;
+      color: #000;
+      position: absolute;
+      top: 50px;
+      left: 50px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+    .window-header {
+      background: #333;
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px 5px 0 0;
+      display: flex;
+      align-items: center;
+      cursor: move;
+    }
+    .window-buttons {
+      display: flex;
+      margin-left: auto;
+    }
+    .window-button {
+      width: 12px;
+      height: 12px;
+      margin-left: 5px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .window-button:nth-child(1) {
+      background-color: #1e90ff;
+    }
+    .window-button:nth-child(2) {
+      background-color: #00ff00;
+    }
+    .window-button:nth-child(3) {
+      background-color: #ff0000;
+    }
+    .window-content {
+      width: 100%;
+      height: calc(100% - 40px); /* Adjusted to exclude the header height */
+    }
+    .window-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+  .desktop {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  position: relative;
+  background: url('bg.jpg') no-repeat center center/cover;
+}
+
+.context-menu {
+  position: absolute;
+  background: #333;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 5px;
+  display: none;
+  z-index: 2000;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.context-menu-item:hover {
+  background: #555;
+}
+
+.desktop-item {
+  width: 80px;
+  height: 100px;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+.desktop-item img {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 5px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+  width: 300px;
+}
+
+.modal-content input {
+  width: 80%;
+  padding: 8px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-buttons button {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.modal-buttons button#confirmName {
+  background: #4caf50;
+  color: white;
+}
+
+.modal-buttons button#cancelName {
+  background: #f44336;
+  color: white;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+  width: 300px;
+}
+
+input[type="text"] {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+button {
+  padding: 8px 16px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #444;
+  color: white;
+}
+
+  </style>
+</head>
+<body>
+  <div class="desktop" id="desktop">
+  <!-- New files and folders will appear here -->
+</div>
+
+<!-- Modal for Renaming Folder/File -->
+<div id="nameModal" class="modal">
+  <div class="modal-content">
+    <label for="itemName">Enter Name:</label>
+    <input type="text" id="itemName" placeholder="Name your folder/file">
+    <button id="saveNameButton">Save</button>
+    <button id="cancelNameButton">Cancel</button>
+  </div>
+</div>
+
+
+
+<div class="context-menu" id="contextMenu">
+  <div class="context-menu-item" id="newFolder">New Folder</div>
+  <div class="context-menu-item" id="newFile">New File</div>
+</div>
+
+  <div class="taskbar">
+    <button class="start-button" id="startButton">
+      <img src="taskbar/eye.jpg" alt="Start">
+    </button>
+    <div class="taskbar-icon" id="app1Icon">
+      <img src="taskbar/text.jpg" alt="Text Editor Icon">
+    </div>
+    <div class="taskbar-icon" id="app2Icon">
+      <img src="taskbar/fe.jpg" alt="File Explorer Icon">
+    </div>
+    <div class="taskbar-icon" id="app3Icon">
+      <img src="taskbar/ht.jpg" alt="HTML Editor Icon">
+    </div>
+    <div class="taskbar-icon" id="app4Icon">
+      <img src="taskbar/gear.jpg" alt="Settings">
+    </div>
+    <div class="taskbar-time" id="taskbarTime"></div>
+  </div>
+
+  <!-- Window 1: Text Editor -->
+  <div class="window" id="window1">
+    <div class="window-header" id="window1Header">
+      <span>Text Editor</span>
+      <div class="window-buttons">
+        <div class="window-button" id="window1Minimize"></div>
+        <div class="window-button" id="window1Maximize"></div>
+        <div class="window-button" id="window1Close"></div>
+      </div>
+    </div>
+    <div class="window-content">
+      <iframe src="../apps/text/text.html"></iframe>
+    </div>
+  </div>
+
+  <!-- Window 2: File Explorer -->
+  <div class="window" id="window2">
+    <div class="window-header" id="window2Header">
+      <span>File Explorer</span>
+      <div class="window-buttons">
+        <div class="window-button" id="window2Minimize"></div>
+        <div class="window-button" id="window2Maximize"></div>
+        <div class="window-button" id="window2Close"></div>
+      </div>
+    </div>
+    <div class="window-content">
+      <iframe src="../apps/file-explorer/file.html"></iframe>
+    </div>
+  </div>
+
+  <!-- Window 3: HTML Editor -->
+  <div class="window" id="window3">
+    <div class="window-header" id="window3Header">
+      <span>HTML Editor</span>
+      <div class="window-buttons">
+        <div class="window-button" id="window3Minimize"></div>
+        <div class="window-button" id="window3Maximize"></div>
+        <div class="window-button" id="window3Close"></div>
+      </div>
+    </div>
+    <div class="window-content">
+      <iframe src="../apps/html/ed.html"></iframe>
+    </div>
+  </div>
+
+  <!-- Window 4: settings -->
+  <div class="window" id="window4">
+    <div class="window-header" id="window4Header">
+      <span>Settings</span>
+      <div class="window-buttons">
+        <div class="window-button" id="window4Minimize"></div>
+        <div class="window-button" id="window4Maximize"></div>
+        <div class="window-button" id="window4Close"></div>
+      </div>
+    </div>
+    <div class="window-content">
+      <iframe src="../apps/settings/settings.html"></iframe>
+    </div>
+  </div>
+
+  <div class="start-menu" id="startMenu">
+    <a href="../end/shut.html">Shutdown</a>
+    <a href="../end/rest.html">Restart</a>
+  </div>
+
+  <script>
+const startButton = document.getElementById('startButton');
+const startMenu = document.getElementById('startMenu');
+const taskbarTime = document.getElementById('taskbarTime');
+
+const appIcons = [
+  { id: 'app1Icon', windowId: 'window1' },
+  { id: 'app2Icon', windowId: 'window2' },
+  { id: 'app3Icon', windowId: 'window3' },
+  { id: 'app4Icon', windowId: 'window4' },
+];
+
+// Set up draggable windows
+const draggableWindows = [
+  { windowId: 'window1', headerId: 'window1Header' },
+  { windowId: 'window2', headerId: 'window2Header' },
+  { windowId: 'window3', headerId: 'window3Header' },
+  { windowId: 'window4', headerId: 'window4Header' },
+];
+
+let isDragging = false;
+let offsetX, offsetY;
+
+function updateTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const date = now.toLocaleDateString();
+  taskbarTime.textContent = `${hours}:${minutes} | ${date}`;
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+startButton.addEventListener('click', () => {
+  startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
+});
+
+window.addEventListener('click', (e) => {
+  if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
+    startMenu.style.display = 'none';
+  }
+});
+
+// Window controls and draggable functionality
+function makeDraggable(windowElement, headerElement) {
+  headerElement.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    offsetX = e.clientX - windowElement.offsetLeft;
+    offsetY = e.clientY - windowElement.offsetTop;
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+
+  function onMouseMove(e) {
+    if (isDragging) {
+      const windowTop = e.clientY - offsetY;
+      const windowLeft = e.clientX - offsetX;
+
+      windowElement.style.left = `${windowLeft}px`;
+      windowElement.style.top = `${windowTop}px`;
+
+      if (windowTop <= 0) {
+        windowElement.classList.add('fullscreen');
+        windowElement.style.left = '0';
+        windowElement.style.top = '0';
+        windowElement.style.width = '100vw';
+        windowElement.style.height = '100vh';
+      } else if (windowElement.classList.contains('fullscreen')) {
+        windowElement.classList.remove('fullscreen');
+        windowElement.style.width = '300px';
+        windowElement.style.height = '400px';
+        windowElement.style.left = '50px';
+        windowElement.style.top = '50px';
+      }
+    }
+  }
+
+  function onMouseUp() {
+    isDragging = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+}
+
+draggableWindows.forEach(({ windowId, headerId }) => {
+  const windowElement = document.getElementById(windowId);
+  const headerElement = document.getElementById(headerId);
+  makeDraggable(windowElement, headerElement);
+});
+
+appIcons.forEach(({ id, windowId }) => {
+  const icon = document.getElementById(id);
+  const windowElement = document.getElementById(windowId);
+
+  icon.addEventListener('click', () => {
+    windowElement.style.display = 'block';
+  });
+
+  const closeButton = windowElement.querySelector('.window-button:nth-child(3)');
+  const maximizeButton = windowElement.querySelector('.window-button:nth-child(2)');
+  const minimizeButton = windowElement.querySelector('.window-button:nth-child(1)');
+
+  closeButton.addEventListener('click', () => {
+    windowElement.style.display = 'none';
+  });
+
+  maximizeButton.addEventListener('click', () => {
+    const isFullScreen = windowElement.classList.toggle('fullscreen');
+    if (isFullScreen) {
+      windowElement.style.left = '0';
+      windowElement.style.top = '0';
+      windowElement.style.width = '100vw';
+      windowElement.style.height = '100vh';
+    } else {
+      windowElement.style.left = '50px';
+      windowElement.style.top = '50px';
+      windowElement.style.width = '300px';
+      windowElement.style.height = '400px';
+    }
+  });
+
+  minimizeButton.addEventListener('click', () => {
+    windowElement.style.display = 'none';
+  });
+});
+
+const desktop = document.getElementById('desktop');
+const contextMenu = document.getElementById('contextMenu');
+const newFolderButton = document.getElementById('newFolder');
+const newFileButton = document.getElementById('newFile');
+const nameModal = document.getElementById('nameModal');
+const itemNameInput = document.getElementById('itemName');
+const saveNameButton = document.getElementById('saveNameButton');
+const cancelNameButton = document.getElementById('cancelNameButton');
+let currentItem = null;
+
+const gridSpacing = 100;
+let occupiedCells = [];
+let itemElements = [];
+
+desktop.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+
+  const { clientX: mouseX, clientY: mouseY } = e;
+  const x = Math.round(mouseX / gridSpacing) * gridSpacing;
+  const y = Math.round(mouseY / gridSpacing) * gridSpacing;
+
+  const existingItem = itemElements.find(item =>
+    Math.round(item.offsetLeft / gridSpacing) * gridSpacing === x &&
+    Math.round(item.offsetTop / gridSpacing) * gridSpacing === y
+  );
+
+  if (existingItem) {
+    // If an item exists in this square, show the "Open" and "Delete" options
+    openItemContextMenu(existingItem, mouseX, mouseY);
+  } else {
+    // If no item exists, show the "New Folder" and "New File" options
+    contextMenu.style.top = `${mouseY}px`;
+    contextMenu.style.left = `${mouseX}px`;
+    contextMenu.style.display = 'block';
+
+    const newFolderOption = document.createElement('div');
+    newFolderOption.classList.add('context-menu-item');
+    newFolderOption.textContent = 'New Folder';
+    newFolderOption.addEventListener('click', () => {
+      createNewItem('folder');
+    });
+
+    const newFileOption = document.createElement('div');
+    newFileOption.classList.add('context-menu-item');
+    newFileOption.textContent = 'New File';
+    newFileOption.addEventListener('click', () => {
+      createNewItem('file');
+    });
+
+    contextMenu.innerHTML = ''; // Clear existing options
+    contextMenu.appendChild(newFolderOption);
+    contextMenu.appendChild(newFileOption);
+  }
+});
+function createNewItem(type) {
+  const item = document.createElement('div');
+  item.classList.add('desktop-item');
+
+  if (type === 'file' || type === 'folder') {
+    // Show modal for naming the item
+    nameModal.style.display = 'flex';
+    itemNameInput.value = '';
+    currentItem = item;
+
+    // Set the context for file or folder creation
+    if (type === 'file') {
+      item.innerHTML = `
+        <img src="taskbar/textf.png" alt="file">
+        <span>New File</span>
+      `;
+    } else {
+      item.innerHTML = `
+        <img src="taskbar/fe.jpg" alt="folder">
+        <span>New Folder</span>
+      `;
+    }
+
+    // Add event listener to the Save button
+    saveNameButton.onclick = () => {
+      const newName = itemNameInput.value.trim();
+      if (newName) {
+        if (type === 'file' && newName.endsWith('.nexs')) {
+          // Special handling for .nexs files
+          item.innerHTML = `
+            <img src="taskbar/nexs.jpg" alt="file">
+            <span>${newName}</span>
+          `;
+        } else if (type === 'file') {
+          // Handle normal file creation
+          item.innerHTML = `
+            <img src="taskbar/textf.png" alt="file">
+            <span>${newName}</span>
+          `;
+        } else if (type === 'folder') {
+          // Handle folder creation
+          item.innerHTML = `
+            <img src="taskbar/fe.jpg" alt="folder">
+            <span>${newName}</span>
+          `;
+        }
+        desktop.appendChild(item);
+        makeDraggable(item);
+
+        itemElements.push(item);  // Track the item
+        currentItem = null;
+        nameModal.style.display = 'none'; // Hide modal after saving name
+        contextMenu.style.display = 'none'; // Hide context menu
+      } else {
+        alert('Please enter a valid name for the item.');
+      }
+    };
+
+    cancelNameButton.onclick = () => {
+      nameModal.style.display = 'none'; // Close modal without saving
+      currentItem = null;
+    };
+  }
+}
+
+
+saveNameButton.addEventListener('click', () => {
+  const newName = itemNameInput.value.trim();
+  if (newName) {
+    if (!currentItem) {
+      const type = contextMenu.style.display === 'none' ? 'file' : 'folder';
+      createNewItem(type);
+    } else {
+      currentItem.querySelector('span').textContent = newName;
+    }
+    nameModal.style.display = 'none';
+    currentItem = null;
+  } else {
+    alert('Please enter a valid name for the item.');
+  }
+});
+
+cancelNameButton.addEventListener('click', () => {
+  nameModal.style.display = 'none';
+  currentItem = null;
+});
+
+function makeDraggable(item) {
+  let offsetX, offsetY;
+  let isDragging = false;
+
+  item.addEventListener('mousedown', (e) => {
+    if (e.button === 0) {  // Left mouse button (0)
+      e.preventDefault();
+
+      isDragging = true;
+
+      offsetX = e.clientX - item.getBoundingClientRect().left;
+      offsetY = e.clientY - item.getBoundingClientRect().top;
+
+      window.addEventListener('mousemove', moveItem);
+      window.addEventListener('mouseup', dropItem);
+    }
+  });
+
+  function moveItem(e) {
+    if (isDragging) {
+      let x = e.clientX - offsetX;
+      let y = e.clientY - offsetY;
+
+      x = Math.round(x / gridSpacing) * gridSpacing;
+      y = Math.round(y / gridSpacing) * gridSpacing;
+
+      if (!isPositionOccupied(x, y)) {
+        item.style.position = 'absolute';
+        item.style.left = `${x}px`;
+        item.style.top = `${y}px`;
+      }
+    }
+  }
+
+  function dropItem() {
+    if (isDragging) {
+      const x = Math.round(item.offsetLeft / gridSpacing) * gridSpacing;
+      const y = Math.round(item.offsetTop / gridSpacing) * gridSpacing;
+
+      if (!isPositionOccupied(x, y)) {
+        item.style.left = `${x}px`;
+        item.style.top = `${y}px`;
+        markPositionOccupied(x, y);
+      } else {
+        item.style.left = `${item.offsetLeft}px`;
+        item.style.top = `${item.offsetTop}px`;
+      }
+
+      isDragging = false;
+      window.removeEventListener('mousemove', moveItem);
+      window.removeEventListener('mouseup', dropItem);
+    }
+  }
+}
+
+function isPositionOccupied(x, y) {
+  return occupiedCells.some(cell => cell.x === x && cell.y === y);
+}
+
+function markPositionOccupied(x, y) {
+  occupiedCells.push({ x, y });
+}
+
+function removeOccupiedPosition(x, y) {
+  occupiedCells = occupiedCells.filter(cell => !(cell.x === x && cell.y === y));
+}
+
+function openItemContextMenu(item, mouseX, mouseY) {
+  contextMenu.style.top = `${mouseY}px`;
+  contextMenu.style.left = `${mouseX}px`;
+  contextMenu.style.display = 'block';
+
+  const openOption = document.createElement('div');
+  openOption.classList.add('context-menu-item');
+  openOption.textContent = 'Open';
+  openOption.addEventListener('click', () => {
+    openItem(item);
+  });
+
+  const deleteOption = document.createElement('div');
+  deleteOption.classList.add('context-menu-item');
+  deleteOption.textContent = 'Delete';
+  deleteOption.addEventListener('click', () => {
+    deleteItem(item);
+  });
+
+  contextMenu.innerHTML = ''; // Clear existing options
+  contextMenu.appendChild(openOption);
+  contextMenu.appendChild(deleteOption);
+}
+
+function openItem(item) {
+  alert(`Opening ${item.querySelector('span').textContent}`);
+  contextMenu.style.display = 'none';
+}
+
+function deleteItem(item) {
+  item.remove();
+  const x = Math.round(item.offsetLeft / gridSpacing) * gridSpacing;
+  const y = Math.round(item.offsetTop / gridSpacing) * gridSpacing;
+
+  removeOccupiedPosition(x, y);
+  contextMenu.style.display = 'none';
+}
+
+window.addEventListener('click', () => {
+  contextMenu.style.display = 'none';
+});
+
+
+  </script>
+</body>
+</html>

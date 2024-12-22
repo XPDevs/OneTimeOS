@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Beep</title>
+    <script>
+        function playBeep() {
+            const audio = new Audio('https://www.soundjay.com/button/beep-07.wav'); // URL of the beep sound
+            audio.play();
+        }
+
+        // Simulating an error (e.g., when a button is clicked)
+        function simulateError() {
+            playBeep(); // Play the beep
+            alert('An error has occurred!');
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Webpage with Beep Sound</h1>
+    <button onclick="simulateError()">Simulate Error</button>
+
+</body>
+</html>

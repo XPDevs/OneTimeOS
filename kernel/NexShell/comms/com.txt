@@ -1,0 +1,15 @@
+for js:
+
+function (name)() {
+// js code here
+}
+
+for html:
+
+<script src="NexShell.js" defer></script>
+<script>
+window.onload = function() {
+//call specific functions
+(function name)();
+}
+</script>

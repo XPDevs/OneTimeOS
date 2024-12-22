@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            padding: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #ddd;
+        }
+
+        .sidebar ul li.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .content h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .input-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .modal-content .restart-later {
+            background-color: #ccc;
+        }
+
+        .modal-content .restart-now {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Factory Reset Section */
+        .factory-reset {
+            background-color: #f44336;
+            color: white;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .factory-reset:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Settings</h2>
+        <ul>
+            <li class="active" data-section="personalization">Personalization</li>
+            <li data-section="factory-reset">Factory Reset</li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <!-- Personalization Section -->
+        <div class="section" id="personalization-section">
+            <h1>Personalization</h1>
+            <h2>Taskbar</h2>
+            <div class="input-group">
+                <label for="taskbar-overlay">
+                    <input type="checkbox" id="taskbar-overlay"> Enable Taskbar Overlay
+                </label>
+            </div>
+        </div>
+
+        <!-- Factory Reset Section -->
+        <div class="section" id="factory-reset-section" style="display: none;">
+            <h1>Factory Reset</h1>
+            <div class="factory-reset">
+                <h2>Warning: This will delete all saved data</h2>
+                <button id="delete-btn">Delete Local Storage and Restart</button>
+                <button id="exit-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="restart-modal">
+        <div class="modal-content">
+            <h2>System Restart Required</h2>
+            <p>The system needs to restart to apply changes. No further operations are permitted until the restart is complete.</p>
+        </div>
+    </div>
+
+    <script>
+        const taskbarOverlayCheckbox = document.getElementById('taskbar-overlay');
+        const restartModal = document.getElementById('restart-modal');
+        const restartNowButton = document.querySelector('.restart-now');
+
+        const personalizationSection = document.getElementById('personalization-section');
+        const factoryResetSection = document.getElementById('factory-reset-section');
+        const factoryResetButton = document.querySelector('[data-section="factory-reset"]');
+
+        // Show modal when the checkbox is toggled
+        taskbarOverlayCheckbox.addEventListener('change', () => {
+            restartModal.style.display = 'flex';
+        });
+
+        // Toggle between sections
+        factoryResetButton.addEventListener('click', () => {
+            personalizationSection.style.display = 'none';
+            factoryResetSection.style.display = 'block';
+        });
+
+        // Factory Reset actions
+        document.getElementById('delete-btn').addEventListener('click', function() {
+            // Clear local storage
+            localStorage.clear();
+
+            // Show restart modal
+            restartModal.style.display = 'flex';
+        });
+
+        // Prevent any actions until restart is complete
+        restartNowButton.addEventListener('click', function() {
+            // Here you can trigger the restart operation or show a message
+            
+        });
+
+        // Close the operation (cancel)
+        document.getElementById('exit-btn').addEventListener('click', function() {
+            window.location.href = "settings.html"; // Example redirection to the main page
+        });
+    </script>
+</body>
+</html>
